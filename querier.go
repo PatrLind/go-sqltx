@@ -8,56 +8,22 @@ import (
 // Querier interface can be used in helper functions that can take either a
 // transaction or a database connection
 type Querier interface {
-	// PrepareContext creates a prepared statement for use within a transaction.
-	//
-	// The returned statement operates within the transaction and will be closed
-	// when the transaction has been committed or rolled back.
-	//
-	// To use an existing prepared statement on this transaction, see Tx.Stmt.
-	//
-	// The provided context will be used for the preparation of the context, not
-	// for the execution of the returned statement. The returned statement
-	// will run in the transaction context.
-	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
-
-	// Prepare creates a prepared statement for use within a transaction.
-	//
-	// The returned statement operates within the transaction and can no longer
-	// be used once the transaction has been committed or rolled back.
-	//
-	// To use an existing prepared statement on this transaction, see Tx.Stmt.
-	Prepare(query string) (*sql.Stmt, error)
-
-	// StmtContext returns a transaction-specific prepared statement from
-	// an existing statement.
-	//
-	// Example:
-	//  updateMoney, err := db.Prepare("UPDATE balance SET money=money+? WHERE id=?")
-	//  ...
-	//  tx, err := db.Begin()
-	//  ...
-	//  res, err := tx.StmtContext(ctx, updateMoney).Exec(123.45, 98293203)
+	// PrepareContext creates a prepared statement for later queries or executions.
+	// Multiple queries or executions may be run concurrently from the
+	// returned statement.
+	// The caller must call the statement's Close method
+	// when the statement is no longer needed.
 	//
 	// The provided context is used for the preparation of the statement, not for the
 	// execution of the statement.
-	//
-	// The returned statement operates within the transaction and will be closed
-	// when the transaction has been committed or rolled back.
-	StmtContext(ctx context.Context, stmt *sql.Stmt) *sql.Stmt
+	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 
-	// Stmt returns a transaction-specific prepared statement from
-	// an existing statement.
-	//
-	// Example:
-	//  updateMoney, err := db.Prepare("UPDATE balance SET money=money+? WHERE id=?")
-	//  ...
-	//  tx, err := db.Begin()
-	//  ...
-	//  res, err := tx.Stmt(updateMoney).Exec(123.45, 98293203)
-	//
-	// The returned statement operates within the transaction and will be closed
-	// when the transaction has been committed or rolled back.
-	Stmt(stmt *sql.Stmt) *sql.Stmt
+	// Prepare creates a prepared statement for later queries or executions.
+	// Multiple queries or executions may be run concurrently from the
+	// returned statement.
+	// The caller must call the statement's Close method
+	// when the statement is no longer needed.
+	Prepare(query string) (*sql.Stmt, error)
 
 	// ExecContext executes a query that doesn't return rows.
 	// For example: an INSERT and UPDATE.
