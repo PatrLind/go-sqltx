@@ -30,5 +30,5 @@ func (d *sqlxDB) BeginTx(ctx context.Context, opts *sql.TxOptions) (sqltx.TXer, 
 	if err != nil {
 		return nil, err
 	}
-	return tx.Tx, nil
+	return tx, nil
 }
