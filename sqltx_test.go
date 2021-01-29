@@ -74,14 +74,11 @@ func TestSqltx(t *testing.T) {
 		Clock:               backoff.SystemClock,
 	}
 	for i := 1; i < 25; i++ {
-		fmt.Println("i", i)
 		for j := 0; j < i; j++ {
-			fmt.Println("MOCK", j)
 			mock.ExpectBegin()
 			mock.ExpectExec("UPDATE products").WillReturnResult(sqlmock.NewResult(1, 1))
 		}
 		err = Tx(ctx, db, &Options{Name: fmt.Sprintf("3-%d", i), Retries: i, Sleeper: sleeper, Backoff: b}, func(tx TXer) error {
-			fmt.Println("TX FUNC")
 			if _, err = tx.Exec("UPDATE products SET views = views + 1"); err != nil {
 				return err
 			}
